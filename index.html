@@ -31,6 +31,11 @@ body{
 #topbar button:hover{color:var(--ink);border-color:var(--gold)}
 #topbar button.on{color:#0a0f1a;background:var(--gold);border-color:var(--gold)}
 #mode{color:var(--ink2)}
+/* slide-move controls — only visible in Edit mode */
+#movectl{display:none;gap:6px;margin-left:14px}
+body.ssla-editing #movectl{display:inline-flex}
+#movectl button{font:inherit;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);background:transparent;border:1px solid var(--line);border-radius:0;padding:5px 10px;cursor:pointer}
+#movectl button:hover{color:var(--gold);border-color:var(--gold)}
 /* 3-dot (kebab) options menu */
 #menuwrap{position:relative}
 #kebab{width:34px;height:34px;display:flex;align-items:center;justify-content:center;gap:3px;flex-direction:column;background:transparent;border:1px solid transparent;border-radius:0;cursor:pointer}
@@ -155,6 +160,7 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
 <div id="topbar">
   <span class="brand">ASK System</span>
   <span id="mode">Presenting</span>
+  <span id="movectl"><button id="mv-left" title="Move this slide earlier">◀ Move</button><button id="mv-right" title="Move this slide later">Move ▶</button></span>
   <span class="sp"></span>
   <div id="menuwrap">
     <button id="kebab" aria-label="Options" title="Options"><i></i><i></i><i></i></button>
@@ -208,7 +214,20 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
     <div class="sub" data-ssla-field="s1i.sub">Go around the room. Each person names ONE small thing they did consistently this week, not the big win, the boring repeat. Ten seconds each. No feedback, just naming.</div>
   </section>
 
-  <!-- 5 · Course title + welcome + 5 video links -->
+  <!-- 5 · App screenshot over the course hero image (swapped ahead of the course slide) -->
+  <section class="slide slide-app" data-ssla-type="s1-app">
+    <div class="bgimg"><img class="bgphoto" src="course-bg.jpg" alt="" onerror="this.remove()"><div class="ov ovdark"></div></div>
+    <div class="appwrap">
+      <div class="apptext">
+        <div class="eyebrow" data-ssla-field="s1a.eyebrow">Then everyone logs in</div>
+        <h2 data-ssla-field="s1a.h2">Access the app</h2>
+        <div class="sub" data-ssla-field="s1a.cap">Your course, the quiz, your daily actions, and your drills all live here.</div>
+      </div>
+      <div class="phone"><img src="app-screenshot.png" alt="The ASK System Progress app" onerror="this.parentElement.classList.add('empty')" /><div class="appph">Drop app-screenshot.png here</div></div>
+    </div>
+  </section>
+
+  <!-- 6 · Course title + welcome + 5 video links (swapped after the app slide) -->
   <section class="slide" data-ssla-type="s1-course">
     <div class="eyebrow" data-ssla-field="s1c.eyebrow">Watch together · ~45 min</div>
     <h2 data-ssla-field="s1c.h2">Why You're Busy and Still Behind</h2>
@@ -221,19 +240,6 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
       <a class="vid" href="https://www.youtube.com/watch?v=O6a58tbu0Vw" target="_blank" rel="noopener"><img src="https://img.youtube.com/vi/O6a58tbu0Vw/mqdefault.jpg" alt="" /><div class="lab"><div class="s" data-ssla-field="v5.s">Segment 5</div><div class="t" data-ssla-field="v5.t">One Rep, One Day</div></div></a>
     </div>
     <div class="meta"><span data-ssla-field="s1c.link">Full playlist: youtube.com/playlist?list=PLZGbNrrfBKz0</span></div>
-  </section>
-
-  <!-- 6 · App screenshot over the course hero image -->
-  <section class="slide slide-app" data-ssla-type="s1-app">
-    <div class="bgimg"><img class="bgphoto" src="course-bg.jpg" alt="" onerror="this.remove()"><div class="ov ovdark"></div></div>
-    <div class="appwrap">
-      <div class="apptext">
-        <div class="eyebrow" data-ssla-field="s1a.eyebrow">Then everyone logs in</div>
-        <h2 data-ssla-field="s1a.h2">Access the app</h2>
-        <div class="sub" data-ssla-field="s1a.cap">Your course, the quiz, your daily actions, and your drills all live here.</div>
-      </div>
-      <div class="phone"><img src="app-screenshot.png" alt="The ASK System Progress app" onerror="this.parentElement.classList.add('empty')" /><div class="appph">Drop app-screenshot.png here</div></div>
-    </div>
   </section>
 
   <!-- ===== SECTION 2: PRACTICE ===== -->
@@ -354,27 +360,52 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
 </div>
 
 <script>
-/* Slide navigation */
+/* Slide navigation + reorder */
 (function(){
-  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
-  var i = 0, total = slides.length;
+  var deck = document.getElementById('deck');
   var count = document.getElementById('count');
+  var slides = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
+  var i = 0;
+  function refresh(){ slides = Array.prototype.slice.call(deck.querySelectorAll('.slide')); }
   function show(n){
-    i = Math.max(0, Math.min(total-1, n));
+    refresh();
+    i = Math.max(0, Math.min(slides.length-1, n));
     slides.forEach(function(s,x){ s.classList.toggle('is-active', x===i); });
-    count.textContent = (i+1)+' / '+total;
+    count.textContent = (i+1)+' / '+slides.length;
   }
   document.getElementById('next').onclick = function(){ show(i+1); };
   document.getElementById('prev').onclick = function(){ show(i-1); };
+
+  // Presenter-remote friendly. BT clickers vary: most send PageDown/PageUp,
+  // some send Enter/Backspace, some arrows. Cover them all. Add ?keys=1 to the
+  // URL to show exactly what a button sends (for diagnosing an odd clicker).
+  var NEXT = {ArrowRight:1, ArrowDown:1, PageDown:1, ' ':1, Spacebar:1, Enter:1};
+  var PREV = {ArrowLeft:1, ArrowUp:1, PageUp:1, Backspace:1};
+  var diag = /[?&]keys=1/.test(location.search);
   document.addEventListener('keydown', function(e){
+    if(diag){ var t=document.getElementById('toast'); if(t){ t.textContent='key: "'+e.key+'"  ·  code '+e.keyCode; t.classList.add('show'); } }
     if(document.body.classList.contains('ssla-editing')) return;
     var vm=document.getElementById('vmodal'); if(vm && vm.classList.contains('open')) return;
-    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); show(i+1); }
-    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); show(i-1); }
-    else if(e.key==='Home'){ show(0); } else if(e.key==='End'){ show(total-1); }
+    if(NEXT[e.key]){ e.preventDefault(); show(i+1); }
+    else if(PREV[e.key]){ e.preventDefault(); show(i-1); }
+    else if(e.key==='Home'){ show(0); } else if(e.key==='End'){ show(slides.length-1); }
   });
-  window.__deckShow = show; window.__deckCount = function(){return total;};
-  count.textContent = '1 / '+total;
+
+  // ---- reorder: move the current slide earlier/later (Edit-mode buttons) ----
+  function move(dir){
+    refresh();
+    var j = i + dir;
+    if(j < 0 || j >= slides.length) return;
+    var a = slides[i], b = slides[j];
+    if(dir > 0) deck.insertBefore(b, a); else deck.insertBefore(a, b);
+    refresh(); i = j; show(i);
+    if(window.__deckSave) window.__deckSave();   // persist the new order
+  }
+  window.__deckMove = move;
+  window.__slideOrder = function(){ refresh(); return slides.map(function(s){ return s.getAttribute('data-ssla-type'); }); };
+  window.__deckRefresh = function(){ refresh(); show(Math.min(i, slides.length-1)); };
+  window.__deckShow = show;
+  count.textContent = '1 / '+slides.length;
 })();
 
 /* Break countdown timer (duration adjustable via #tMin) */
@@ -412,8 +443,12 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
   // factory defaults = the text baked into this file; used by Reset
   var factory = {}; nodes.forEach(function(el){ factory[el.getAttribute('data-ssla-field')] = el.innerHTML; });
   function fields(){ var f = {}; nodes.forEach(function(el){ f[el.getAttribute('data-ssla-field')] = el.innerHTML; }); return f; }
-  function payload(){ return { page:PAGE, rev:REV, contract:'ssla-fields-v1', fields:fields() }; }
-  function apply(data){ if(!data || !data.fields) return; Object.keys(data.fields).forEach(function(k){ var el = document.querySelector('[data-ssla-field="'+k.replace(/"/g,'\\"')+'"]'); if(el) el.innerHTML = data.fields[k]; }); }
+  function payload(){ return { page:PAGE, rev:REV, contract:'ssla-fields-v1', order:(window.__slideOrder?window.__slideOrder():undefined), fields:fields() }; }
+  function apply(data){
+    if(!data) return;
+    if(data.fields) Object.keys(data.fields).forEach(function(k){ var el = document.querySelector('[data-ssla-field="'+k.replace(/"/g,'\\"')+'"]'); if(el) el.innerHTML = data.fields[k]; });
+    if(data.order && data.order.length){ var d = document.getElementById('deck'); data.order.forEach(function(t){ var el = d.querySelector('.slide[data-ssla-type="'+t+'"]'); if(el) d.appendChild(el); }); if(window.__deckRefresh) window.__deckRefresh(); }
+  }
 
   // ---- load current content from the embedded single source ----
   try { var emb = document.getElementById('ssla-content'); if(emb && emb.textContent.trim()) apply(JSON.parse(emb.textContent)); } catch(e){}
@@ -428,6 +463,7 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
       .catch(function(){ try{ localStorage.setItem(PAGE+':content', JSON.stringify(payload())); }catch(e){} setState('Saved on this device (offline)'); return false; });
   }
   function queueSave(){ dirty=true; setState('Editing…'); if(saveTimer) clearTimeout(saveTimer); saveTimer=setTimeout(doSave, 1200); }
+  window.__deckSave = function(){ setState('Reordering…'); return doSave(); };  // used by slide-move buttons
 
   var editing=false;
   function setEdit(on){
@@ -452,6 +488,10 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
   document.addEventListener('click', function(){ openMenu(false); });
   menu.addEventListener('click', function(e){ e.stopPropagation(); });
   document.getElementById('mi-edit').onclick=function(){ setEdit(!editing); openMenu(false); };
+  // slide-move buttons (visible only in edit mode)
+  var mvl=document.getElementById('mv-left'), mvr=document.getElementById('mv-right');
+  if(mvl) mvl.onclick=function(){ if(window.__deckMove) window.__deckMove(-1); };
+  if(mvr) mvr.onclick=function(){ if(window.__deckMove) window.__deckMove(1); };
   document.getElementById('mi-download').onclick=function(){
     var blob=new Blob([JSON.stringify(payload(),null,2)],{type:'application/json'});
     var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=PAGE+'-content.json';
