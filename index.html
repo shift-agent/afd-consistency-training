@@ -450,8 +450,12 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
     if(data.order && data.order.length){ var d = document.getElementById('deck'); data.order.forEach(function(t){ var el = d.querySelector('.slide[data-ssla-type="'+t+'"]'); if(el) d.appendChild(el); }); if(window.__deckRefresh) window.__deckRefresh(); }
   }
 
-  // ---- load current content from the embedded single source ----
+  // ---- load content: embedded single source, then overlay any edits that
+  //      were saved locally but not yet baked to the file (keeps live-deck
+  //      edits from vanishing on reload, so Download reflects them) ----
   try { var emb = document.getElementById('ssla-content'); if(emb && emb.textContent.trim()) apply(JSON.parse(emb.textContent)); } catch(e){}
+  var hasLocal = false;
+  try { var ls = localStorage.getItem(PAGE+':content'); if(ls){ apply(JSON.parse(ls)); hasLocal = true; } } catch(e){}
 
   // ---- auto-save: POST back into the HTML (serve.py bakes + git + publish) ----
   var saveTimer=null, dirty=false;
@@ -459,8 +463,8 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
     dirty=false; setState('Saving…');
     return fetch('/ssla-save', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload())})
       .then(function(r){ if(!r.ok) throw 0; return r.json().catch(function(){return {ok:true};}); })
-      .then(function(res){ setState(res && res.pushed ? 'All changes saved · live updated' : 'All changes saved'); return true; })
-      .catch(function(){ try{ localStorage.setItem(PAGE+':content', JSON.stringify(payload())); }catch(e){} setState('Saved on this device (offline)'); return false; });
+      .then(function(res){ try{ localStorage.removeItem(PAGE+':content'); }catch(e){} hasLocal=false; setState(res && res.pushed ? 'All changes saved · live updated' : 'All changes saved'); return true; })
+      .catch(function(){ try{ localStorage.setItem(PAGE+':content', JSON.stringify(payload())); }catch(e){} hasLocal=true; setState('Saved in this browser — use Download to keep a copy'); return false; });
   }
   function queueSave(){ dirty=true; setState('Editing…'); if(saveTimer) clearTimeout(saveTimer); saveTimer=setTimeout(doSave, 1200); }
   window.__deckSave = function(){ setState('Reordering…'); return doSave(); };  // used by slide-move buttons
@@ -500,10 +504,12 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
   document.getElementById('mi-reset').onclick=function(){
     openMenu(false);
     if(confirm('Reset every slide to the original text?\n\nThis discards your current edits and cannot be undone.')){
+      try{ localStorage.removeItem(PAGE+':content'); }catch(e){} hasLocal=false;
       apply({fields:factory}); say('Reset to original'); doSave();
     }
   };
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') openMenu(false); });
+  if(hasLocal) setState('Showing your saved edits — Download to keep them');
 })();
 
 /* Inline video modal: click a thumbnail -> graceful modal; Prev/Next/Esc */
