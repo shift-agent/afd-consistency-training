@@ -31,6 +31,22 @@ body{
 #topbar button:hover{color:var(--ink);border-color:var(--gold)}
 #topbar button.on{color:#0a0f1a;background:var(--gold);border-color:var(--gold)}
 #mode{color:var(--ink2)}
+/* 3-dot (kebab) options menu */
+#menuwrap{position:relative}
+#kebab{width:34px;height:34px;display:flex;align-items:center;justify-content:center;gap:3px;flex-direction:column;background:transparent;border:1px solid transparent;border-radius:0;cursor:pointer}
+#kebab:hover{border-color:var(--line)}
+#kebab i{width:4px;height:4px;background:var(--ink2);border-radius:50%;display:block}
+#kebab:hover i{background:var(--gold)}
+#kebab.armed i{background:var(--gold)}
+#menu{position:absolute;top:40px;right:0;min-width:190px;background:#0c1526;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.5);padding:5px;display:none;z-index:70}
+#menu.open{display:block}
+#menu .mi{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:9px 12px;font:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:transparent;border:0;text-align:left;cursor:pointer}
+#menu .mi:hover{background:rgba(166,124,0,.14);color:var(--gold)}
+#menu .mi .ck{color:var(--gold);font-size:12px;opacity:0}
+#menu .mi.on .ck{opacity:1}
+#menu .mi.danger:hover{background:rgba(200,60,60,.16);color:#ff8c8c}
+#menu .sep{height:1px;background:var(--line);margin:4px 6px}
+#menu .save-state{padding:6px 12px 3px;font-size:10px;letter-spacing:.08em;color:var(--ink2);text-transform:none}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0d1830;border:1px solid var(--gold);color:var(--gold);padding:8px 16px;font-size:12px;letter-spacing:.08em;opacity:0;transition:.25s;z-index:60}
 #toast.show{opacity:1}
 #deck{position:absolute; inset:46px 0 0 0}
@@ -140,9 +156,16 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
   <span class="brand">ASK System</span>
   <span id="mode">Presenting</span>
   <span class="sp"></span>
-  <button id="btn-edit">Edit</button>
-  <button id="btn-save">Save JSON</button>
-  <button id="btn-reset">Reset</button>
+  <div id="menuwrap">
+    <button id="kebab" aria-label="Options" title="Options"><i></i><i></i><i></i></button>
+    <div id="menu" role="menu">
+      <button class="mi" id="mi-edit" role="menuitemcheckbox"><span>Edit slides</span><span class="ck">✓</span></button>
+      <div class="sep"></div>
+      <button class="mi" id="mi-download" role="menuitem"><span>Download a copy</span></button>
+      <button class="mi danger" id="mi-reset" role="menuitem"><span>Reset to original…</span></button>
+      <div class="save-state" id="save-state">Auto-save on</div>
+    </div>
+  </div>
 </div>
 
 <main id="deck">
@@ -313,6 +336,7 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
   <button id="next" aria-label="Next">›</button>
 </div>
 <div id="toast"></div>
+<script type="application/json" id="ssla-content">{"page":"afd-training-day","rev":3,"contract":"ssla-fields-v1","fields":{"title.eyebrow":"Quarterly Training · 8/13/26","title.h1":"Welcome, AFD!","title.sub":"Today we will focus on the things that make us a great team and work to improve our skills together all related to consistency.&nbsp;","title.meta":"The ASK System · Atlantic Family Dentistry","agenda.eyebrow":"The day · three sections","agenda.h2":"How today works","agenda.p1":"<b>Hour 1 · Learn.</b> Watch the Consistency course together, then take the quiz in your own account.","agenda.p2":"<b>Hour 2 · Put it into practice.</b> Three objectives: Own the Day, Present with Confidence, Connect First.","agenda.p3":"<b>Hour 3 · See the whole team's picture.</b> Our ASK Profile results, then quick 1-1's.","agenda.meta":"Consistency · AFD","s1d.eyebrow":"Hour 1 · Learning time · 60 min","s1d.h1":"Why You're Busy and Still Behind","s1d.sub":"Our Consistency course. Watch together, then take the quiz and build your one-page plan.","s1d.badge":"Section 1 of 3 · Learn","s1i.eyebrow":"Icebreaker · 5 min","s1i.h2":"One Rep","s1i.sub":"Go around the room. Each person names ONE small thing they did consistently this week, not the big win, the boring repeat. Ten seconds each. No feedback, just naming.","s1c.eyebrow":"Watch together · ~45 min","s1c.h2":"Why You're Busy and Still Behind","s1c.welcome":"Welcome to The <b>ASK </b>System. We'll watch these five short segments together, clicking through them one at a time. Then you'll log into your account and take the quiz.","v1.s":"Segment 1","v1.t":"Busy but Behind","v2.s":"Segment 2","v2.t":"Know What Matters","v3.s":"Segment 3","v3.t":"Do What Matters","v4.s":"Segment 4","v4.t":"Measure What Matters","v5.s":"Segment 5","v5.t":"One Rep, One Day","s1c.link":"Full playlist: youtube.com/playlist?list=PLZGbNrrfBKz0","s1a.eyebrow":"Then everyone logs in","s1a.h2":"Access the app","s1a.cap":"Your course, the quiz, your daily actions, and your drills all live here.","s2.eyebrow":"Hour 2 · 60 min · Put It Into Practice","s2.h2":"Three objectives for the day","s2.sub":"Not a rotation. Three habits we're installing together, each one a rep you protect.","o1.n":"01","o1.h":"Own the Day","o1.p":"<div><b>LENY</b></div>Read the schedule for opportunity. Yes to same-day until we can't. How can I make it work today?","o2.n":"02","o2.h":"Present with Confidence","o2.p":"<div><b>SAMMI</b></div>The three steps to a treatment yes: present and get the yes, request the timeline, transfer authority.","o3.n":"03","o3.h":"Connect First","o3.p":"<div><b>DR YASSA</b></div>The F.O.R.E. interview and the 4 Values. Meet the patient before you present the plan.","s2.badge":"Section 2 of 3 · Practice","s2c.eyebrow":"Make it yours","s2c.h2":"\"The single area of consistency from this morning I'm applying to my job is ___.\"","s2c.sub":"Fill in the blank for yourself. That's the rep you protect, starting tomorrow.","br.eyebrow":"Between Hour 2 and Hour 3","br.h1":"Break","br.note":"Back on time keeps us on rhythm.","s3d.eyebrow":"Hour 3 · 60 min","s3d.h1":"See the Whole Team's Picture","s3d.sub":"Here's where we stand on the ASK Profile: what it means for us, and what we're going to do about it.","s3d.badge":"Section 3 of 3 · ASK Review","s3t.eyebrow":"Team view · 0–30 min","s3t.h2":"Where the team stands","s3t.p1":"<b>Team zone: GROW.</b> Overall 3.04 / 5.00 across the four C's. The foundation is real and the next zone is within reach.","s3t.p2":"<b>Cooperation leads</b>; Consistency is our growth edge, which is exactly what today is about.","s3t.btn":"Open the team review ›","s311.eyebrow":"Quick 1-1's · 30–60 min","s311.h2":"Pair up: three questions","s311.stem":"Stem: \"In your experience, or by your ASK results…\"","q1.tag":"Align","q1.q":"\"What is most important to you about your work?\"","q2.tag":"Shift","q2.q":"\"What tasks or actions make you feel successful when you do them?\"","q3.tag":"Keep","q3.q":"\"What do you measure your success by?\"","s311.note":"Use your cheat card (your own ALIGN / SHIFT / KEEP results) to answer.","cl.eyebrow":"One rep, one day","cl.h1":"Go first.","cl.sub":"Pick the single keystone habit you'll install this week, small enough to keep on a bad day. Name it, name the boundary, name the day. One small rhythm, protected.","cl.meta":"The ASK System · Consistency · 8/13/26"}}</script>
 
 <div id="vmodal" role="dialog" aria-modal="true" aria-label="Course video">
   <div class="vmbox">
@@ -373,33 +397,73 @@ body.ssla-editing [data-ssla-field]:focus{outline:2px solid var(--ice);backgroun
   render();
 })();
 
-/* SSLA edit layer (ss-launch data-ssla-field contract) */
+/* SSLA single-source edit layer.
+   Content lives in THIS file (the #ssla-content block below) — one source of
+   truth, no sidecar file to lose. Editing auto-saves back into the HTML via
+   serve.py (which git-commits + publishes each save). Reset restores the text
+   baked into the page. */
 (function(){
-  var PAGE = 'afd-training-day', REV = 2;
+  var PAGE = 'afd-training-day', REV = 3;
   var toast = document.getElementById('toast');
+  var saveState = document.getElementById('save-state');
   function say(m){ toast.textContent = m; toast.classList.add('show'); setTimeout(function(){toast.classList.remove('show');}, 1800); }
-  function fields(){ var f = {}; document.querySelectorAll('[data-ssla-field]').forEach(function(el){ f[el.getAttribute('data-ssla-field')] = el.innerHTML; }); return f; }
+  function setState(t){ if(saveState) saveState.textContent = t; }
+  var nodes = [].slice.call(document.querySelectorAll('[data-ssla-field]'));
+  // factory defaults = the text baked into this file; used by Reset
+  var factory = {}; nodes.forEach(function(el){ factory[el.getAttribute('data-ssla-field')] = el.innerHTML; });
+  function fields(){ var f = {}; nodes.forEach(function(el){ f[el.getAttribute('data-ssla-field')] = el.innerHTML; }); return f; }
   function payload(){ return { page:PAGE, rev:REV, contract:'ssla-fields-v1', fields:fields() }; }
   function apply(data){ if(!data || !data.fields) return; Object.keys(data.fields).forEach(function(k){ var el = document.querySelector('[data-ssla-field="'+k.replace(/"/g,'\\"')+'"]'); if(el) el.innerHTML = data.fields[k]; }); }
-  var editing = false;
-  function setEdit(on){
-    editing = on;
-    document.body.classList.toggle('ssla-editing', on);
-    document.querySelectorAll('[data-ssla-field]').forEach(function(el){ el.contentEditable = on ? 'true' : 'false'; });
-    document.getElementById('btn-edit').classList.toggle('on', on);
-    document.getElementById('mode').textContent = on ? 'Editing' : 'Presenting';
-    if(on) say('Editing. Click any text. Save JSON when done.');
-  }
-  function postSave(silent){
+
+  // ---- load current content from the embedded single source ----
+  try { var emb = document.getElementById('ssla-content'); if(emb && emb.textContent.trim()) apply(JSON.parse(emb.textContent)); } catch(e){}
+
+  // ---- auto-save: POST back into the HTML (serve.py bakes + git + publish) ----
+  var saveTimer=null, dirty=false;
+  function doSave(){
+    dirty=false; setState('Saving…');
     return fetch('/ssla-save', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload())})
-      .then(function(r){ if(!r.ok) throw 0; if(!silent) say('Saved to content.json'); return true; })
-      .catch(function(){ var blob = new Blob([JSON.stringify(payload(),null,2)], {type:'application/json'}); var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = PAGE+'-content.json'; document.body.appendChild(a); a.click(); a.remove(); say('Downloaded '+PAGE+'-content.json'); return false; });
+      .then(function(r){ if(!r.ok) throw 0; return r.json().catch(function(){return {ok:true};}); })
+      .then(function(res){ setState(res && res.pushed ? 'All changes saved · live updated' : 'All changes saved'); return true; })
+      .catch(function(){ try{ localStorage.setItem(PAGE+':content', JSON.stringify(payload())); }catch(e){} setState('Saved on this device (offline)'); return false; });
   }
-  document.getElementById('btn-edit').onclick = function(){ setEdit(!editing); if(!editing) postSave(true); };
-  document.getElementById('btn-save').onclick = function(){ postSave(false); };
-  document.getElementById('btn-reset').onclick = function(){ if(confirm('Reset all slides to the original text? This clears saved edits in this browser view.')) location.reload(); };
-  fetch('content.json', {cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).then(apply).catch(function(){});
-  document.querySelectorAll('[data-ssla-field]').forEach(function(el){ el.contentEditable='false'; });
+  function queueSave(){ dirty=true; setState('Editing…'); if(saveTimer) clearTimeout(saveTimer); saveTimer=setTimeout(doSave, 1200); }
+
+  var editing=false;
+  function setEdit(on){
+    editing=on;
+    document.body.classList.toggle('ssla-editing', on);
+    nodes.forEach(function(el){ el.contentEditable = on ? 'true':'false'; });
+    document.getElementById('mi-edit').classList.toggle('on', on);
+    document.getElementById('mode').textContent = on ? 'Editing' : 'Presenting';
+    setState(on ? 'Auto-save on — click any text' : 'Auto-save on');
+    if(!on && dirty) doSave();
+  }
+  nodes.forEach(function(el){
+    el.contentEditable='false';
+    el.addEventListener('input', function(){ if(editing) queueSave(); });
+    el.addEventListener('blur', function(){ if(editing && dirty) doSave(); });
+  });
+
+  // ---- 3-dot options menu ----
+  var kebab=document.getElementById('kebab'), menu=document.getElementById('menu');
+  function openMenu(o){ menu.classList.toggle('open', o); kebab.classList.toggle('armed', o); }
+  kebab.onclick=function(e){ e.stopPropagation(); openMenu(!menu.classList.contains('open')); };
+  document.addEventListener('click', function(){ openMenu(false); });
+  menu.addEventListener('click', function(e){ e.stopPropagation(); });
+  document.getElementById('mi-edit').onclick=function(){ setEdit(!editing); openMenu(false); };
+  document.getElementById('mi-download').onclick=function(){
+    var blob=new Blob([JSON.stringify(payload(),null,2)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=PAGE+'-content.json';
+    document.body.appendChild(a); a.click(); a.remove(); openMenu(false); say('Downloaded a copy');
+  };
+  document.getElementById('mi-reset').onclick=function(){
+    openMenu(false);
+    if(confirm('Reset every slide to the original text?\n\nThis discards your current edits and cannot be undone.')){
+      apply({fields:factory}); say('Reset to original'); doSave();
+    }
+  };
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') openMenu(false); });
 })();
 
 /* Inline video modal: click a thumbnail -> graceful modal; Prev/Next/Esc */
